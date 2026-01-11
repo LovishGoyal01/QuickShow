@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react'
-import { dummyShowsData } from '../../assets/assets';
 import { Loader } from 'lucide-react';
 import { dateFormat } from '../../lib/dateFormat';
 import Title from '../../components/admin/Title';
+import { useAppContext } from '../../context/AppContext';
 
 const ListShows = () => {
+
+  const {axios, getToken, user} = useAppContext();
 
   const currency = import.meta.env.VITE_CURRENCY
 
@@ -13,25 +15,19 @@ const ListShows = () => {
 
   const getAllShows = async () => {
      try {
-       setShows([{
-         movie: dummyShowsData[0],
-         showDateTime: "2025-06-30T02:30:00.000Z",
-         showPrice: 59,
-         occupiedSeats: {
-           A1: "user_1",
-           B1: "user_2",
-           C1: "user_3"
-         }
-       }]);
-       setLoading(false);
+        const { data } = await axios.get( '/api/admin/all-shows', { headers: { Authorization: `Bearer ${await getToken()}` }});
+        setShows(data.shows)
      } catch (error) {
        console.error(error);
      }
+      setLoading(false)
   }
 
   useEffect(()=>{
-    getAllShows()
-  },[])
+    if(user){
+      getAllShows()
+    }
+  },[user])
 
   return !loading ? (
     <>
